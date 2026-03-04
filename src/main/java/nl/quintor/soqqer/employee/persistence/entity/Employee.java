@@ -9,8 +9,8 @@ import nl.quintor.soqqer.common.BaseEntity;
 @Getter
 @Setter
 @Table(
-        name = "users",
-        uniqueConstraints = @UniqueConstraint(name = "uk_users_name_office", columnNames = {"name", "office"})
+        name = "employees",
+        uniqueConstraints = @UniqueConstraint(name = "uk_employees_name_office", columnNames = {"name", "office"})
 )
 public class Employee extends BaseEntity {
     @Column(name = "name", nullable = false)
