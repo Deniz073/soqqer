@@ -39,16 +39,22 @@ public class GlobalExceptionHandler {
         log.error("Validation error: {}", ex.getMessage());
 
         Map<String, String> errors = new HashMap<>();
+
         ex.getBindingResult().getAllErrors().forEach(error -> {
-            String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
+
+            if (error instanceof FieldError fieldError) {
+                errors.put(fieldError.getField(), errorMessage);
+            } else {
+                errors.put(error.getObjectName(), errorMessage);
+            }
         });
 
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
                 "Validation failed for one or more fields"
         );
+
         problemDetail.setTitle("Validation Error");
         problemDetail.setProperty("timestamp", Instant.now());
         problemDetail.setProperty("errors", errors);

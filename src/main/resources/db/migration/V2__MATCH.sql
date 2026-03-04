@@ -25,9 +25,6 @@ ALTER TABLE match_players
     ADD CONSTRAINT uk_match_players_match_employee UNIQUE (match_id, employee_id);
 
 ALTER TABLE match_players
-    ADD CONSTRAINT FK_MATCH_PLAYERS_ON_MATCH FOREIGN KEY (match_id) REFERENCES matches (id);
-
-ALTER TABLE match_players
     ADD CONSTRAINT fk_match_players_match FOREIGN KEY (match_id) REFERENCES matches (id) ON DELETE CASCADE;
 
 ALTER TABLE match_players
