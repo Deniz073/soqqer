@@ -34,9 +34,9 @@ public class EmployeeService {
     }
 
     public EmployeeDTO findById(Long id) {
-        var employee = employeeRepository.findById(id)
+        return employeeRepository.findById(id)
+                .map(employeeMapper::toDTO)
                 .orElseThrow(() -> new EntityNotFoundException("Employee with id " + id + " was not found."));
-        return employeeMapper.toDTO(employee);
     }
 
     public EmployeeDTO update(Long id, UpdateEmployeeDTO dto) {

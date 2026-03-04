@@ -4,8 +4,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import nl.quintor.soqqer.employee.persistence.entity.Office;
 
-import java.io.Serializable;
-
 /**
  * DTO for {@link nl.quintor.soqqer.employee.persistence.entity.Employee}
  */
