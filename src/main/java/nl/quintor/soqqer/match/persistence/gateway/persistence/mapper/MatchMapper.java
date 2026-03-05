@@ -1,9 +1,16 @@
 package nl.quintor.soqqer.match.persistence.gateway.persistence.mapper;
 
 import org.mapstruct.*;
+import nl.quintor.soqqer.employee.EmployeeMTO;
+import nl.quintor.soqqer.match.persistence.gateway.api.dto.MatchPlayerDTO;
 import nl.quintor.soqqer.match.persistence.entity.Match;
 import nl.quintor.soqqer.match.persistence.gateway.api.dto.CreateMatchDTO;
 import nl.quintor.soqqer.match.persistence.gateway.api.dto.MatchDTO;
+
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
@@ -15,6 +22,15 @@ public interface MatchMapper {
     @AfterMapping
     default void linkPlayers(@MappingTarget Match match) {
         match.getPlayers().forEach(player -> player.setMatch(match));
+    }
+
+    default MatchDTO toDtoWithEmployees(Match match, Map<Long, EmployeeMTO> employeeMap) {
+        var matchDTO = toDto(match);
+        Set<MatchPlayerDTO> players = match.getPlayers().stream()
+                .map(player -> new MatchPlayerDTO(employeeMap.get(player.getEmployeeId()), player.getTeam()))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        matchDTO.setPlayers(players);
+        return matchDTO;
     }
 
 }

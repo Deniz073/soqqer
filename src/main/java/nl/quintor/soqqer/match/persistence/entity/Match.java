@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import nl.quintor.soqqer.common.BaseEntity;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -24,5 +25,6 @@ public class Match extends BaseEntity {
     private Integer teamTwoScore;
 
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 20)
     private Set<MatchPlayer> players = new LinkedHashSet<>();
 }

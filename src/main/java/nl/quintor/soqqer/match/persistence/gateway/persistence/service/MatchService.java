@@ -2,15 +2,25 @@ package nl.quintor.soqqer.match.persistence.gateway.persistence.service;
 
 import lombok.RequiredArgsConstructor;
 import nl.quintor.soqqer.employee.EmployeeLookup;
+import nl.quintor.soqqer.employee.EmployeeMTO;
 import nl.quintor.soqqer.match.persistence.gateway.api.dto.CreateMatchDTO;
 import nl.quintor.soqqer.match.persistence.gateway.api.dto.CreateMatchPlayerDTO;
 import nl.quintor.soqqer.match.persistence.gateway.api.dto.MatchDTO;
-import nl.quintor.soqqer.match.persistence.exception.UnknownMatchPlayersException;
 import nl.quintor.soqqer.match.persistence.gateway.api.dto.MatchPlayerDTO;
+import nl.quintor.soqqer.match.persistence.entity.Match;
+import nl.quintor.soqqer.match.persistence.entity.MatchPlayer;
+import nl.quintor.soqqer.match.persistence.exception.UnknownMatchPlayersException;
 import nl.quintor.soqqer.match.persistence.gateway.persistence.mapper.MatchMapper;
 import nl.quintor.soqqer.match.persistence.gateway.persistence.repository.MatchRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,6 +30,19 @@ public class MatchService {
     private final MatchRepository matchRepository;
     private final MatchMapper matchMapper;
     private final EmployeeLookup employeeLookup;
+
+    public Page<MatchDTO> find(Pageable pageable) {
+        var recentMatchesPage = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        var matchPage = matchRepository.findAll(recentMatchesPage);
+        var employeeMap = fetchEmployeesForMatches(matchPage.getContent());
+
+        return matchPage.map(match -> matchMapper.toDtoWithEmployees(match, employeeMap));
+    }
 
     public MatchDTO createMatch(CreateMatchDTO dto) {
         var employeeIds = dto.players().stream()
@@ -32,15 +55,16 @@ public class MatchService {
         }
 
         var entity = matchMapper.toEntity(dto);
-        var matchDTO = matchMapper.toDto(matchRepository.save(entity));
-        var employees = employeeLookup.findEmployees(employeeIds);
-        Set<MatchPlayerDTO> matchPlayers = dto.players().stream()
-                .map(player -> new MatchPlayerDTO(employees.get(player.employeeId()), player.team()))
+        var savedMatch = matchRepository.save(entity);
+        return matchMapper.toDtoWithEmployees(savedMatch, fetchEmployeesForMatches(List.of(savedMatch)));
+    }
+
+    private Map<Long, EmployeeMTO> fetchEmployeesForMatches(List<Match> matches) {
+        Set<Long> employeeIds = matches.stream()
+                .flatMap(match -> match.getPlayers().stream())
+                .map(MatchPlayer::getEmployeeId)
                 .collect(Collectors.toSet());
 
-        matchDTO.setPlayers(matchPlayers);
-
-
-        return matchDTO;
+        return employeeLookup.findEmployees(employeeIds);
     }
 }
