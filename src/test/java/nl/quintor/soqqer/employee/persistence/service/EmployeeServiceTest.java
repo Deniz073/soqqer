@@ -50,8 +50,8 @@ class EmployeeServiceTest {
 
         when(employeeMapper.toDTO(anyList())).thenReturn(
                 List.of(
-                        new EmployeeDTO(1L, "test", null),
-                        new EmployeeDTO(2L, "test2", null)
+                        new EmployeeDTO(1L, "test", null, 1000),
+                        new EmployeeDTO(2L, "test2", null, 1000)
                 )
         );
 
@@ -81,7 +81,7 @@ class EmployeeServiceTest {
         var dto = new CreateEmployeeDTO("test", Office.DENBOSCH);
         var entity = Employee.builder().name("test").office(Office.DENBOSCH).build();
         entity.setId(1L);
-        var mappedDto = new EmployeeDTO(1L, "test", Office.DENBOSCH);
+        var mappedDto = new EmployeeDTO(1L, "test", Office.DENBOSCH, 1000);
 
         when(employeeRepository.existsByNameAndOffice(dto.name(), dto.office())).thenReturn(false);
         when(employeeMapper.toEntity(dto)).thenReturn(entity);
@@ -98,7 +98,7 @@ class EmployeeServiceTest {
     void findById_Returns_EmployeeDTO_When_Found() {
         var employee = Employee.builder().name("test").office(Office.DENBOSCH).build();
         employee.setId(1L);
-        var dto = new EmployeeDTO(1L, "test", Office.DENBOSCH);
+        var dto = new EmployeeDTO(1L, "test", Office.DENBOSCH, 1000);
 
         when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
         when(employeeMapper.toDTO(employee)).thenReturn(dto);
@@ -150,7 +150,7 @@ class EmployeeServiceTest {
         employee.setId(5L);
         var updatedEmployee = Employee.builder().name("updated").office(Office.DENHAAG).build();
         updatedEmployee.setId(5L);
-        var mappedDto = new EmployeeDTO(5L, "updated", Office.DENHAAG);
+        var mappedDto = new EmployeeDTO(5L, "updated", Office.DENHAAG, 1000);
 
         when(employeeRepository.findById(5L)).thenReturn(Optional.of(employee));
         when(employeeRepository.existsByNameAndOfficeAndIdNot(dto.name(), dto.office(), 5L)).thenReturn(false);

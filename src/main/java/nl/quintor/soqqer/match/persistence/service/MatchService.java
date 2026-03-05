@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,7 @@ public class MatchService {
         return matchPage.map(match -> matchMapper.toDtoWithEmployees(match, employeeMap));
     }
 
+    @Transactional
     public MatchDTO createMatch(CreateMatchDTO dto) {
         var employeeIds = dto.players().stream()
                 .map(CreateMatchPlayerDTO::employeeId)
