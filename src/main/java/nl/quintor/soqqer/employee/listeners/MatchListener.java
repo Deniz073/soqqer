@@ -2,7 +2,7 @@ package nl.quintor.soqqer.employee.listeners;
 
 import lombok.RequiredArgsConstructor;
 import nl.quintor.soqqer.employee.persistence.service.EmployeeService;
-import nl.quintor.soqqer.match.events.MatchFinishedEvent;
+import nl.quintor.soqqer.common.events.match.MatchFinishedEvent;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Component;
 

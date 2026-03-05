@@ -1,4 +1,4 @@
-package nl.quintor.soqqer.match.events;
+package nl.quintor.soqqer.common.events.match;
 
 import java.util.List;
 

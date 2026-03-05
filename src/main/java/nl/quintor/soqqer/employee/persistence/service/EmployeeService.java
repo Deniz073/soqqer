@@ -12,7 +12,7 @@ import nl.quintor.soqqer.employee.persistence.entity.Employee;
 import nl.quintor.soqqer.employee.persistence.exception.EmployeeAlreadyExistsException;
 import nl.quintor.soqqer.employee.persistence.mapper.EmployeeMapper;
 import nl.quintor.soqqer.employee.persistence.repository.EmployeeRepository;
-import nl.quintor.soqqer.match.events.MatchFinishedEvent;
+import nl.quintor.soqqer.common.events.match.MatchFinishedEvent;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;

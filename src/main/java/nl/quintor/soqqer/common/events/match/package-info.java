@@ -1,4 +1,4 @@
 @NamedInterface
-package nl.quintor.soqqer.match.events;
+package nl.quintor.soqqer.common.events.match;
 
 import org.springframework.modulith.NamedInterface;

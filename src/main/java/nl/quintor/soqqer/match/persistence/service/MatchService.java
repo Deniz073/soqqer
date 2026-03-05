@@ -3,7 +3,7 @@ package nl.quintor.soqqer.match.persistence.service;
 import lombok.RequiredArgsConstructor;
 import nl.quintor.soqqer.employee.EmployeeLookup;
 import nl.quintor.soqqer.employee.EmployeeMTO;
-import nl.quintor.soqqer.match.events.MatchFinishedEvent;
+import nl.quintor.soqqer.common.events.match.MatchFinishedEvent;
 import nl.quintor.soqqer.match.gateway.api.dto.CreateMatchDTO;
 import nl.quintor.soqqer.match.gateway.api.dto.CreateMatchPlayerDTO;
 import nl.quintor.soqqer.match.gateway.api.dto.MatchDTO;
