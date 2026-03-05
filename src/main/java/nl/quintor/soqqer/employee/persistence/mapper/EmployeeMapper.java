@@ -1,5 +1,6 @@
 package nl.quintor.soqqer.employee.persistence.mapper;
 
+import nl.quintor.soqqer.employee.EmployeeMTO;
 import nl.quintor.soqqer.employee.gateway.api.dto.CreateEmployeeDTO;
 import nl.quintor.soqqer.employee.gateway.api.dto.EmployeeDTO;
 import nl.quintor.soqqer.employee.gateway.api.dto.UpdateEmployeeDTO;
@@ -20,5 +21,6 @@ public interface EmployeeMapper {
     List<EmployeeDTO> toDTO(List<Employee> employees);
 
     Employee update(UpdateEmployeeDTO dto, @MappingTarget Employee employee);
+    EmployeeMTO toMTO(Employee employee);
 
 }

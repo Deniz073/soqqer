@@ -2,6 +2,9 @@ package nl.quintor.soqqer.employee.persistence.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import nl.quintor.soqqer.common.BaseEntity;
+import nl.quintor.soqqer.employee.EmployeeLookup;
+import nl.quintor.soqqer.employee.EmployeeMTO;
 import nl.quintor.soqqer.employee.gateway.api.dto.CreateEmployeeDTO;
 import nl.quintor.soqqer.employee.gateway.api.dto.EmployeeDTO;
 import nl.quintor.soqqer.employee.gateway.api.dto.UpdateEmployeeDTO;
@@ -10,11 +13,15 @@ import nl.quintor.soqqer.employee.persistence.mapper.EmployeeMapper;
 import nl.quintor.soqqer.employee.persistence.repository.EmployeeRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class EmployeeService {
+public class EmployeeService implements EmployeeLookup {
     private final EmployeeRepository employeeRepository;
     private final EmployeeMapper employeeMapper;
 
@@ -58,5 +65,27 @@ public class EmployeeService {
         var employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee with id " + id + " was not found."));
         employeeRepository.delete(employee);
+    }
+
+    @Override
+    public Set<Long> findMissingEmployeeIds(Set<Long> employeeIds) {
+        if (employeeIds == null || employeeIds.isEmpty()) {
+            return Set.of();
+        }
+
+        var existingIds = employeeRepository.findAllById(employeeIds).stream()
+                .map(BaseEntity::getId)
+                .collect(Collectors.toSet());
+
+        return employeeIds.stream()
+                .filter(employeeId -> !existingIds.contains(employeeId))
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Map<Long, EmployeeMTO> findEmployees(Set<Long> employeeIds) {
+        var employees = employeeRepository.findAllById(employeeIds);
+
+        return employees.stream().collect(Collectors.toMap(BaseEntity::getId, employeeMapper::toMTO));
     }
 }
