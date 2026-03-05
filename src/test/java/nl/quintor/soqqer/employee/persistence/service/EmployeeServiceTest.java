@@ -10,6 +10,7 @@ import nl.quintor.soqqer.employee.persistence.entity.Office;
 import nl.quintor.soqqer.employee.persistence.exception.EmployeeAlreadyExistsException;
 import nl.quintor.soqqer.employee.persistence.mapper.EmployeeMapper;
 import nl.quintor.soqqer.employee.persistence.repository.EmployeeRepository;
+import nl.quintor.soqqer.match.events.MatchFinishedEvent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -232,5 +233,94 @@ class EmployeeServiceTest {
                         1L, new EmployeeMTO("test", Office.DENBOSCH),
                         2L, new EmployeeMTO("test2", Office.DENHAAG)
                 ));
+    }
+
+    @Test
+    void calculateNewPlayerElos_UpdatesRatings_For1v1Match() {
+        var p1 = Employee.builder().name("A").office(Office.DENBOSCH).elo(1000).build();
+        p1.setId(1L);
+        var p2 = Employee.builder().name("B").office(Office.DENHAAG).elo(1000).build();
+        p2.setId(2L);
+
+        var event = new MatchFinishedEvent(10, 8, List.of(1L), List.of(2L));
+
+        when(employeeRepository.findAllById(Set.of(1L, 2L)))
+                .thenReturn(List.of(p1, p2));
+
+        employeeService.calculateNewPlayerElos(event);
+
+        assertThat(p1.getElo()).isEqualTo(1010);
+        assertThat(p2.getElo()).isEqualTo(990);
+
+        verify(employeeRepository).saveAll(any());
+    }
+
+    @Test
+    void calculateNewPlayerElos_UpdatesRatings_For2v2Match() {
+        var a1 = Employee.builder().name("A1").office(Office.DENBOSCH).elo(1000).build();
+        a1.setId(1L);
+        var a2 = Employee.builder().name("A2").office(Office.DENBOSCH).elo(1000).build();
+        a2.setId(2L);
+
+        var b1 = Employee.builder().name("B1").office(Office.DENHAAG).elo(1000).build();
+        b1.setId(3L);
+        var b2 = Employee.builder().name("B2").office(Office.DENHAAG).elo(1000).build();
+        b2.setId(4L);
+
+        var event = new MatchFinishedEvent(10, 6, List.of(1L, 2L), List.of(3L, 4L));
+
+        when(employeeRepository.findAllById(Set.of(1L,2L,3L,4L)))
+                .thenReturn(List.of(a1, a2, b1, b2));
+
+        employeeService.calculateNewPlayerElos(event);
+
+        assertThat(a1.getElo()).isEqualTo(1010);
+        assertThat(a2.getElo()).isEqualTo(1010);
+        assertThat(b1.getElo()).isEqualTo(990);
+        assertThat(b2.getElo()).isEqualTo(990);
+
+        verify(employeeRepository).saveAll(any());
+    }
+
+    @Test
+    void calculateNewPlayerElos_UnderdogWin_GivesBiggerRatingGain() {
+        var a = Employee.builder().name("A").office(Office.DENBOSCH).elo(1000).build();
+        a.setId(1L);
+
+        var b = Employee.builder().name("B").office(Office.DENHAAG).elo(1200).build();
+        b.setId(2L);
+
+        var event = new MatchFinishedEvent(10, 8, List.of(1L), List.of(2L));
+
+        when(employeeRepository.findAllById(Set.of(1L,2L)))
+                .thenReturn(List.of(a,b));
+
+        employeeService.calculateNewPlayerElos(event);
+
+        assertThat(a.getElo()).isGreaterThan(1010);
+        assertThat(b.getElo()).isLessThan(1190);
+
+        verify(employeeRepository).saveAll(any());
+    }
+
+    @Test
+    void calculateNewPlayerElos_Draw_AdjustsRatingsTowardEachOther() {
+        var a = Employee.builder().name("A").office(Office.DENBOSCH).elo(1200).build();
+        a.setId(1L);
+
+        var b = Employee.builder().name("B").office(Office.DENHAAG).elo(1000).build();
+        b.setId(2L);
+
+        var event = new MatchFinishedEvent(9, 9, List.of(1L), List.of(2L));
+
+        when(employeeRepository.findAllById(Set.of(1L,2L)))
+                .thenReturn(List.of(a,b));
+
+        employeeService.calculateNewPlayerElos(event);
+
+        assertThat(a.getElo()).isLessThan(1200);
+        assertThat(b.getElo()).isGreaterThan(1000);
+
+        verify(employeeRepository).saveAll(any());
     }
 }

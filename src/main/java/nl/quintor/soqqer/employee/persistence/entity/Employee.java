@@ -22,4 +22,8 @@ public class Employee extends BaseEntity {
     @Column(name = "office", nullable = false)
     private Office office;
 
+    @Builder.Default
+    @Column(name = "elo", nullable = false)
+    private Integer elo = 1000;
+
 }

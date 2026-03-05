@@ -1,4 +1,4 @@
-package nl.quintor.soqqer.match.persistence.gateway.api.dto.validation;
+package nl.quintor.soqqer.match.gateway.api.dto.validation;
 
 import java.lang.annotation.*;
 import jakarta.validation.Constraint;

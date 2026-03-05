@@ -1,10 +1,10 @@
-package nl.quintor.soqqer.match.persistence.gateway.api;
+package nl.quintor.soqqer.match.gateway.api;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import nl.quintor.soqqer.match.persistence.gateway.api.dto.CreateMatchDTO;
-import nl.quintor.soqqer.match.persistence.gateway.api.dto.MatchDTO;
-import nl.quintor.soqqer.match.persistence.gateway.persistence.service.MatchService;
+import nl.quintor.soqqer.match.gateway.api.dto.CreateMatchDTO;
+import nl.quintor.soqqer.match.gateway.api.dto.MatchDTO;
+import nl.quintor.soqqer.match.persistence.service.MatchService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;

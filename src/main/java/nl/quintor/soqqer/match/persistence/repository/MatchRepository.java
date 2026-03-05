@@ -1,4 +1,4 @@
-package nl.quintor.soqqer.match.persistence.gateway.persistence.repository;
+package nl.quintor.soqqer.match.persistence.repository;
 
 import nl.quintor.soqqer.match.persistence.entity.Match;
 import org.springframework.data.jpa.repository.JpaRepository;

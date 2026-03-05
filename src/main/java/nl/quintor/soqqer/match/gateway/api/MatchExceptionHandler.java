@@ -1,4 +1,4 @@
-package nl.quintor.soqqer.match.persistence.gateway.api;
+package nl.quintor.soqqer.match.gateway.api;
 
 import lombok.extern.slf4j.Slf4j;
 import nl.quintor.soqqer.match.persistence.exception.UnknownMatchPlayersException;

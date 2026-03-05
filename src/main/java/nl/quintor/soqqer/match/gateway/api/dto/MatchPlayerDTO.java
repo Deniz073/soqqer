@@ -1,4 +1,4 @@
-package nl.quintor.soqqer.match.persistence.gateway.api.dto;
+package nl.quintor.soqqer.match.gateway.api.dto;
 
 import nl.quintor.soqqer.employee.EmployeeMTO;
 import nl.quintor.soqqer.match.persistence.entity.MatchTeam;

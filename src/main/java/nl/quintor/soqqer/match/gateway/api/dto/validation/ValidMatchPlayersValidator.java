@@ -1,9 +1,9 @@
-package nl.quintor.soqqer.match.persistence.gateway.api.dto.validation;
+package nl.quintor.soqqer.match.gateway.api.dto.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import nl.quintor.soqqer.match.persistence.entity.MatchTeam;
-import nl.quintor.soqqer.match.persistence.gateway.api.dto.CreateMatchPlayerDTO;
+import nl.quintor.soqqer.match.gateway.api.dto.CreateMatchPlayerDTO;
 
 import java.util.HashSet;
 import java.util.List;

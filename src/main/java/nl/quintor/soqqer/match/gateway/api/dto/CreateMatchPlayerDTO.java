@@ -1,4 +1,4 @@
-package nl.quintor.soqqer.match.persistence.gateway.api.dto;
+package nl.quintor.soqqer.match.gateway.api.dto;
 
 import jakarta.validation.constraints.NotNull;
 import nl.quintor.soqqer.match.persistence.entity.MatchTeam;

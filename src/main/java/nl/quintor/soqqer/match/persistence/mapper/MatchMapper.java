@@ -1,17 +1,16 @@
-package nl.quintor.soqqer.match.persistence.gateway.persistence.mapper;
+package nl.quintor.soqqer.match.persistence.mapper;
 
 import org.mapstruct.*;
 import nl.quintor.soqqer.employee.EmployeeMTO;
-import nl.quintor.soqqer.match.persistence.gateway.api.dto.MatchPlayerDTO;
+import nl.quintor.soqqer.match.gateway.api.dto.MatchPlayerDTO;
 import nl.quintor.soqqer.match.persistence.entity.Match;
-import nl.quintor.soqqer.match.persistence.gateway.api.dto.CreateMatchDTO;
-import nl.quintor.soqqer.match.persistence.gateway.api.dto.MatchDTO;
+import nl.quintor.soqqer.match.gateway.api.dto.CreateMatchDTO;
+import nl.quintor.soqqer.match.gateway.api.dto.MatchDTO;
 
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface MatchMapper {

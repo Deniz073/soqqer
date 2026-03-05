@@ -1,4 +1,4 @@
-package nl.quintor.soqqer.match.persistence.gateway.api.dto;
+package nl.quintor.soqqer.match.gateway.api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
