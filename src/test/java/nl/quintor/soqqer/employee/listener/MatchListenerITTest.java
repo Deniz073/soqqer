@@ -15,6 +15,7 @@ import org.springframework.modulith.test.ApplicationModuleTest;
 import org.springframework.modulith.test.Scenario;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.Duration;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,8 +34,8 @@ class MatchListenerITTest {
 
     @Test
     void onMatchFinishedEvent_Calculates_New_elo_For_Players(Scenario scenario) {
-        var employee1 = Employee.builder().name("Player 1").office(Office.DENBOSCH).elo(1000).build();
-        var employee2 = Employee.builder().name("Player 2").office(Office.DENBOSCH).elo(1000).build();
+        var employee1 = Employee.builder().name("Player 1").office(Office.DENBOSCH).elo(1000).crawlCounter(0).build();
+        var employee2 = Employee.builder().name("Player 2").office(Office.DENBOSCH).elo(1000).crawlCounter(0).build();
         employeeRepository.saveAll(List.of(employee1, employee2));
 
         MatchFinishedEvent event = new MatchFinishedEvent(
@@ -45,6 +46,7 @@ class MatchListenerITTest {
         );
 
         scenario.publish(event)
+                .andWaitAtMost(Duration.ofSeconds(5))
                 .andWaitForStateChange(() ->
                         employeeRepository.findById(employee1.getId())
                                 .map(Employee::getElo)
@@ -58,4 +60,33 @@ class MatchListenerITTest {
                     assertThat(playerTwoElo).isLessThan(1000);
                 });
     }
+
+    @Test
+    void onMatchFinishedEvent_Increments_Crawl_Counter(Scenario scenario) {
+        var employee1 = Employee.builder().name("Player 1").office(Office.DENBOSCH).elo(1000).crawlCounter(0).build();
+        var employee2 = Employee.builder().name("Player 2").office(Office.DENBOSCH).elo(1000).crawlCounter(0).build();
+        employeeRepository.saveAll(List.of(employee1, employee2));
+
+        MatchFinishedEvent event = new MatchFinishedEvent(
+                10,
+                0,
+                List.of(employee1.getId()),
+                List.of(employee2.getId())
+        );
+
+        scenario.publish(event)
+                .andWaitAtMost(Duration.ofSeconds(5))
+                .andWaitForStateChange(() ->
+                        employeeRepository.findById(employee2.getId())
+                                .map(Employee::getCrawlCounter)
+                                .orElseThrow(),
+                        counter -> counter != 0)
+                .andVerify(playerTwoCrawlCount -> {
+                    var playerOneCrawlCount = employeeRepository.findById(employee1.getId()).orElseThrow().getCrawlCounter();
+
+                    assertThat(playerOneCrawlCount).isZero();
+                    assertThat(playerTwoCrawlCount).isEqualTo(1);
+                });
+    }
+
 }

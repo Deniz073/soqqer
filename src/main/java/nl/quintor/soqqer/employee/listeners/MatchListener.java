@@ -14,5 +14,6 @@ public class MatchListener {
     @ApplicationModuleListener
     void on(MatchFinishedEvent event) {
         employeeService.calculateNewPlayerElos(event);
+        employeeService.handleCrawlCounter(event);
     }
 }

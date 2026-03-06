@@ -26,4 +26,8 @@ public class Employee extends BaseEntity {
     @Column(name = "elo", nullable = false)
     private Integer elo = 1000;
 
+    @Builder.Default
+    @Column(name = "crawl_counter", nullable = false)
+    private Integer crawlCounter = 0;
+
 }

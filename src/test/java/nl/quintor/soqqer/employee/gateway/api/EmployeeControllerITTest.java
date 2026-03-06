@@ -170,6 +170,7 @@ class EmployeeControllerITTest extends BaseITTest {
         assertThat(employee.id()).isNotNull();
         assertThat(employee.name()).isEqualTo(name);
         assertThat(employee.office()).isEqualTo(office);
+        assertThat(employee.crawlCounter()).isEqualTo(0);
         assertThat(result.getResponseHeaders().getLocation()).hasPath("/api/employees/" + employee.id());
 
         return employee;

@@ -66,8 +66,8 @@ class MatchServiceTest {
         mappedDto.setTeamTwoScore(8);
 
         var employeeMap = Map.of(
-                11L, new EmployeeMTO("Player One", null),
-                22L, new EmployeeMTO("Player Two", null)
+                11L, new EmployeeMTO("Player One", null, 1000, 0),
+                22L, new EmployeeMTO("Player Two", null, 1000, 0)
         );
 
         when(matchRepository.findAll(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"))))
@@ -145,8 +145,8 @@ class MatchServiceTest {
         );
 
         var employees = Map.of(
-                11L, new EmployeeMTO("Player One", null),
-                22L, new EmployeeMTO("Player Two", null)
+                11L, new EmployeeMTO("Player One", null, 1000, 0),
+                22L, new EmployeeMTO("Player Two", null, 1000, 0)
         );
 
         var mappedDto = new MatchDTO();

@@ -131,6 +131,22 @@ public class EmployeeService implements EmployeeLookup {
         employeeRepository.saveAll(employees.values());
     }
 
+    public void handleCrawlCounter(MatchFinishedEvent event) {
+        if (event.teamOneScore() >= 10 && event.teamTwoScore() == 0) {
+            var teamTwoPlayers = employeeRepository.findAllById(event.teamTwoPlayerIds());
+
+            teamTwoPlayers.forEach(employee -> employee.setCrawlCounter(employee.getCrawlCounter() + 1));
+
+            employeeRepository.saveAll(teamTwoPlayers);
+        } else if (event.teamTwoScore() >= 10 && event.teamOneScore() == 0) {
+            var teamOnePlayers = employeeRepository.findAllById(event.teamOnePlayerIds());
+
+            teamOnePlayers.forEach(employee -> employee.setCrawlCounter(employee.getCrawlCounter() + 1));
+
+            employeeRepository.saveAll(teamOnePlayers);
+        }
+    }
+
     @Override
     public Set<Long> findMissingEmployeeIds(Set<Long> employeeIds) {
         if (employeeIds == null || employeeIds.isEmpty()) {
