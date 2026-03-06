@@ -30,7 +30,7 @@ De applicatie gebruikt standaard deze database-instellingen:
 - Wachtwoord: `secret`
 - Poort: `5432`
 
-3. Stoppen van PostgreSQL (optioneel):
+3. Stoppen van PostgreSQL:
 
 ```powershell
 docker compose down
