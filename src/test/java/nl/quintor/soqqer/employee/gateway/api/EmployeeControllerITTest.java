@@ -1,6 +1,6 @@
 package nl.quintor.soqqer.employee.gateway.api;
 
-import nl.quintor.soqqer.config.TestcontainersConfiguration;
+import nl.quintor.soqqer.config.BaseITTest;
 import nl.quintor.soqqer.employee.gateway.api.dto.CreateEmployeeDTO;
 import nl.quintor.soqqer.employee.gateway.api.dto.EmployeeDTO;
 import nl.quintor.soqqer.employee.gateway.api.dto.UpdateEmployeeDTO;
@@ -8,25 +8,17 @@ import nl.quintor.soqqer.employee.persistence.entity.Office;
 import nl.quintor.soqqer.employee.persistence.repository.EmployeeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Import;
-import org.springframework.modulith.test.ApplicationModuleTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.modulith.test.ApplicationModuleTest;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 @ApplicationModuleTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("it")
-@Import(TestcontainersConfiguration.class)
-class EmployeeControllerITTest {
-
-    @LocalServerPort
-    private int port;
+class EmployeeControllerITTest extends BaseITTest {
 
     @Autowired
     private EmployeeRepository employeeRepository;
