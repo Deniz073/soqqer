@@ -53,14 +53,14 @@ class EmployeeControllerITTest extends BaseITTest {
                 .jsonPath("$.length()").isEqualTo(1)
                 .jsonPath("$[0].id").isEqualTo(created.id())
                 .jsonPath("$[0].name").isEqualTo("Deniz")
-                .jsonPath("$[0].office").isEqualTo("DENBOSCH");
+                .jsonPath("$[0].office").isEqualTo("Den Bosch");
 
         restTestClient.get().uri("/{id}", created.id()).exchange()
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.id").isEqualTo(created.id())
                 .jsonPath("$.name").isEqualTo("Deniz")
-                .jsonPath("$.office").isEqualTo("DENBOSCH");
+                .jsonPath("$.office").isEqualTo("Den Bosch");
 
         restTestClient.put().uri("/{id}", created.id())
                 .body(new UpdateEmployeeDTO("Sasha", Office.DENHAAG))
@@ -69,7 +69,7 @@ class EmployeeControllerITTest extends BaseITTest {
                 .expectBody()
                 .jsonPath("$.id").isEqualTo(created.id())
                 .jsonPath("$.name").isEqualTo("Sasha")
-                .jsonPath("$.office").isEqualTo("DENHAAG");
+                .jsonPath("$.office").isEqualTo("Den Haag");
 
         restTestClient.delete().uri("/{id}", created.id()).exchange()
                 .expectStatus().isNoContent();
@@ -169,7 +169,7 @@ class EmployeeControllerITTest extends BaseITTest {
         assertThat(employee).isNotNull();
         assertThat(employee.id()).isNotNull();
         assertThat(employee.name()).isEqualTo(name);
-        assertThat(employee.office()).isEqualTo(office);
+        assertThat(employee.office()).isEqualTo(office.getNormalizedName());
         assertThat(employee.crawlCounter()).isEqualTo(0);
         assertThat(result.getResponseHeaders().getLocation()).hasPath("/api/employees/" + employee.id());
 

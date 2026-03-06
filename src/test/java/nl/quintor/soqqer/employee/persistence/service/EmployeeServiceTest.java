@@ -81,7 +81,7 @@ class EmployeeServiceTest {
         var dto = new CreateEmployeeDTO("test", Office.DENBOSCH);
         var entity = Employee.builder().name("test").office(Office.DENBOSCH).build();
         entity.setId(1L);
-        var mappedDto = new EmployeeDTO(1L, "test", Office.DENBOSCH, 1000, 0);
+        var mappedDto = new EmployeeDTO(1L, "test", "Den Bosch", 1000, 0);
 
         when(employeeRepository.existsByNameAndOffice(dto.name(), dto.office())).thenReturn(false);
         when(employeeMapper.toEntity(dto)).thenReturn(entity);
@@ -98,7 +98,7 @@ class EmployeeServiceTest {
     void findById_Returns_EmployeeDTO_When_Found() {
         var employee = Employee.builder().name("test").office(Office.DENBOSCH).build();
         employee.setId(1L);
-        var dto = new EmployeeDTO(1L, "test", Office.DENBOSCH, 1000, 0);
+        var dto = new EmployeeDTO(1L, "test", "Den Bosch", 1000, 0);
 
         when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
         when(employeeMapper.toDTO(employee)).thenReturn(dto);
@@ -150,7 +150,7 @@ class EmployeeServiceTest {
         employee.setId(5L);
         var updatedEmployee = Employee.builder().name("updated").office(Office.DENHAAG).build();
         updatedEmployee.setId(5L);
-        var mappedDto = new EmployeeDTO(5L, "updated", Office.DENHAAG, 1000, 0);
+        var mappedDto = new EmployeeDTO(5L, "updated", "Den Haag", 1000, 0);
 
         when(employeeRepository.findById(5L)).thenReturn(Optional.of(employee));
         when(employeeRepository.existsByNameAndOfficeAndIdNot(dto.name(), dto.office(), 5L)).thenReturn(false);
@@ -223,15 +223,15 @@ class EmployeeServiceTest {
         second.setId(2L);
 
         when(employeeRepository.findAllById(Set.of(1L, 2L))).thenReturn(List.of(first, second));
-        when(employeeMapper.toMTO(first)).thenReturn(new EmployeeMTO("test", Office.DENBOSCH, 1000, 0));
-        when(employeeMapper.toMTO(second)).thenReturn(new EmployeeMTO("test2", Office.DENHAAG, 1000, 0));
+        when(employeeMapper.toMTO(first)).thenReturn(new EmployeeMTO("test", "Den Bosch", 1000, 0));
+        when(employeeMapper.toMTO(second)).thenReturn(new EmployeeMTO("test2", "Den Haag", 1000, 0));
 
         var result = employeeService.findEmployees(Set.of(1L, 2L));
 
         assertThat(result)
                 .isEqualTo(Map.of(
-                        1L, new EmployeeMTO("test", Office.DENBOSCH, 1000, 0),
-                        2L, new EmployeeMTO("test2", Office.DENHAAG, 1000, 0)
+                        1L, new EmployeeMTO("test", "Den Bosch", 1000, 0),
+                        2L, new EmployeeMTO("test2", "Den Haag", 1000, 0)
                 ));
     }
 
