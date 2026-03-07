@@ -1,4 +1,5 @@
 [![Java CI](https://github.com/Deniz073/soqqer/actions/workflows/tests.yml/badge.svg)](https://github.com/Deniz073/soqqer/actions/workflows/tests.yml)
+[![Docker](https://github.com/Deniz073/soqqer/actions/workflows/docker.yml/badge.svg)](https://github.com/Deniz073/soqqer/actions/workflows/docker.yml)
 
 # Soqqer
 
