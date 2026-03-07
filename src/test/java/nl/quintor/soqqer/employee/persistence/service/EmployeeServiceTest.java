@@ -42,7 +42,7 @@ class EmployeeServiceTest {
     private EmployeeService employeeService;
 
     @Test
-    void findAll_Returns__Employees_As_EmployeeDTO() {
+    void findAll_Returns_Employees_As_EmployeeDTO() {
         var pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "elo"));
         var employee1 = Employee.builder().name("test").build();
         var employee2 = Employee.builder().name("test2").build();

@@ -34,10 +34,14 @@ public class EmployeeService implements EmployeeLookup {
     private static final int K = 20;
 
     public Page<EmployeeDTO> find(Pageable pageable) {
+        Sort sort = pageable.getSort().isSorted()
+                ? pageable.getSort()
+                : Sort.by(Sort.Direction.DESC, "elo");
+
         var pageReq = PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
-                Sort.by(Sort.Direction.DESC, "elo")
+                sort
         );
 
         var employeesPage = employeeRepository.findAll(pageReq);

@@ -25,7 +25,7 @@ public class MatchController {
     private final MatchService matchService;
 
     @GetMapping
-    public ResponseEntity<Page<MatchDTO>> find(@PageableDefault(size = 20) Pageable pageable) {
+    public ResponseEntity<Page<MatchDTO>> find(@PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(matchService.find(pageable));
     }
 

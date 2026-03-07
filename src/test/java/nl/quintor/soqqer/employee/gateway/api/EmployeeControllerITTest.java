@@ -104,7 +104,7 @@ class EmployeeControllerITTest extends BaseITTest {
                 .expectBody()
                 .jsonPath("$.title").isEqualTo("Validation Error")
                 .jsonPath("$.detail").isEqualTo("Validation failed for one or more fields")
-                .jsonPath("$.errors.name").isEqualTo("Naam moet tussen 1 en 255 karakters zijn.")
+                .jsonPath("$.errors.name").isEqualTo("Naam moet tussen 2 en 255 karakters zijn.")
                 .jsonPath("$.errors.office").isEqualTo("Kantoor is verplicht.");
     }
 
@@ -144,7 +144,7 @@ class EmployeeControllerITTest extends BaseITTest {
                 .expectBody()
                 .jsonPath("$.title").isEqualTo("Validation Error")
                 .jsonPath("$.detail").isEqualTo("Validation failed for one or more fields")
-                .jsonPath("$.errors.name").isEqualTo("Naam moet tussen 1 en 255 karakters zijn.")
+                .jsonPath("$.errors.name").isEqualTo("Naam moet tussen 2 en 255 karakters zijn.")
                 .jsonPath("$.errors.office").isEqualTo("Kantoor is verplicht.");
     }
 

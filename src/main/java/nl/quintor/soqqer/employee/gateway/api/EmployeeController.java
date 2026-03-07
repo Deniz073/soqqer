@@ -30,7 +30,7 @@ public class EmployeeController {
     private final EmployeeService employeeService;
 
     @GetMapping
-    public ResponseEntity<Page<EmployeeDTO>> getEmployees(@PageableDefault(size = 20) Pageable pageable) {
+    public ResponseEntity<Page<EmployeeDTO>> getEmployees(@PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(employeeService.find(pageable));
     }
 
