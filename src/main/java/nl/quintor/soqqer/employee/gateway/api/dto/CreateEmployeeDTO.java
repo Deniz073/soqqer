@@ -8,7 +8,7 @@ import nl.quintor.soqqer.employee.persistence.entity.Office;
  * DTO for {@link nl.quintor.soqqer.employee.persistence.entity.Employee}
  */
 public record CreateEmployeeDTO(
-        @Size(message = "Naam moet tussen 1 en 255 karakters zijn.", min = 1, max = 255)
+        @Size(message = "Naam moet tussen 2 en 255 karakters zijn.", min = 2, max = 255)
         @NotNull( message = "Naam is verplicht.")
         String name,
         @NotNull( message = "Kantoor is verplicht.")

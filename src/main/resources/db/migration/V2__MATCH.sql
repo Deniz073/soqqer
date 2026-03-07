@@ -5,7 +5,7 @@ CREATE TABLE match_players
     created_at  TIMESTAMP WITHOUT TIME ZONE             NOT NULL,
     updated_at  TIMESTAMP WITHOUT TIME ZONE,
     match_id    BIGINT                                  NOT NULL,
-    employee_id BIGINT                                  NOT NULL,
+    employee_id BIGINT,
     team        VARCHAR(255)                            NOT NULL,
     CONSTRAINT pk_match_players PRIMARY KEY (id)
 );
@@ -22,13 +22,13 @@ CREATE TABLE matches
 );
 
 ALTER TABLE match_players
-    ADD CONSTRAINT uk_match_players_match_employee UNIQUE (match_id, employee_id);
-
-ALTER TABLE match_players
     ADD CONSTRAINT fk_match_players_match FOREIGN KEY (match_id) REFERENCES matches (id) ON DELETE CASCADE;
 
 ALTER TABLE match_players
-    ADD CONSTRAINT fk_match_players_employee FOREIGN KEY (employee_id) REFERENCES employees (id);
+    ADD CONSTRAINT fk_match_players_employee FOREIGN KEY (employee_id) REFERENCES employees (id) ON DELETE SET NULL;
 
 CREATE INDEX idx_match_players_match_id ON match_players (match_id);
 CREATE INDEX idx_match_players_employee_id ON match_players (employee_id);
+CREATE UNIQUE INDEX uk_match_players_match_employee
+    ON match_players(match_id, employee_id)
+    WHERE employee_id IS NOT NULL;

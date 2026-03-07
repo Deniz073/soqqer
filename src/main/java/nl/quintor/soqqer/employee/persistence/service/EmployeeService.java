@@ -13,6 +13,10 @@ import nl.quintor.soqqer.employee.persistence.exception.EmployeeAlreadyExistsExc
 import nl.quintor.soqqer.employee.persistence.mapper.EmployeeMapper;
 import nl.quintor.soqqer.employee.persistence.repository.EmployeeRepository;
 import nl.quintor.soqqer.common.events.match.MatchFinishedEvent;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -29,8 +33,15 @@ public class EmployeeService implements EmployeeLookup {
     private final EmployeeMapper employeeMapper;
     private static final int K = 20;
 
-    public List<EmployeeDTO> findAll() {
-        return employeeMapper.toDTO(employeeRepository.findAll());
+    public Page<EmployeeDTO> find(Pageable pageable) {
+        var pageReq = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "elo")
+        );
+
+        var employeesPage = employeeRepository.findAll(pageReq);
+        return employeesPage.map(employeeMapper::toDTO);
     }
 
     public EmployeeDTO create(CreateEmployeeDTO dto) {

@@ -35,7 +35,8 @@ class EmployeeControllerITTest extends BaseITTest {
     void getAllEmployees_Returns_Empty_When_No_Employees_Exist() {
         restTestClient.get().exchange()
                 .expectStatus().isOk()
-                .expectBody().json("[]");
+                .expectBody()
+                .jsonPath("$.content.length()").isEqualTo(0);
     }
 
     @Test
@@ -50,10 +51,10 @@ class EmployeeControllerITTest extends BaseITTest {
         restTestClient.get().exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.length()").isEqualTo(1)
-                .jsonPath("$[0].id").isEqualTo(created.id())
-                .jsonPath("$[0].name").isEqualTo("Deniz")
-                .jsonPath("$[0].office").isEqualTo("Den Bosch");
+                .jsonPath("$.content.length()").isEqualTo(1)
+                .jsonPath("$.content[0].id").isEqualTo(created.id())
+                .jsonPath("$.content[0].name").isEqualTo("Deniz")
+                .jsonPath("$.content[0].office").isEqualTo("Den Bosch");
 
         restTestClient.get().uri("/{id}", created.id()).exchange()
                 .expectStatus().isOk()

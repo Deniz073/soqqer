@@ -30,7 +30,7 @@ public class MatchPlayer extends BaseEntity {
     @JoinColumn(name = "match_id", nullable = false)
     private Match match;
 
-    @Column(name = "employee_id", nullable = false)
+    @Column(name = "employee_id")
     private Long employeeId;
 
     @Enumerated(EnumType.STRING)
