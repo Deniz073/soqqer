@@ -70,7 +70,7 @@ class MatchServiceTest {
                 22L, new EmployeeMTO("Player Two", null, 1000, 0)
         );
 
-        when(matchRepository.findAll(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"))))
+        when(matchRepository.findAll(pageable))
                 .thenReturn(new PageImpl<>(List.of(match)));
         when(employeeLookup.findEmployees(Set.of(11L, 22L))).thenReturn(employeeMap);
         when(matchMapper.toDtoWithEmployees(match, employeeMap)).thenReturn(mappedDto);
@@ -78,7 +78,7 @@ class MatchServiceTest {
         var result = matchService.find(pageable);
 
         assertThat(result.getContent()).containsExactly(mappedDto);
-        verify(matchRepository).findAll(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt")));
+        verify(matchRepository).findAll(pageable);
     }
 
     @Test

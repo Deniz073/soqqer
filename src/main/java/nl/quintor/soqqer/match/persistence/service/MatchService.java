@@ -35,10 +35,14 @@ public class MatchService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public Page<MatchDTO> find(Pageable pageable) {
+        Sort sort = pageable.getSort().isSorted()
+                ? pageable.getSort()
+                : Sort.by(Sort.Direction.DESC, "createdAt");
+
         var recentMatchesPage = PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
-                Sort.by(Sort.Direction.DESC, "createdAt")
+                sort
         );
 
         var matchPage = matchRepository.findAll(recentMatchesPage);

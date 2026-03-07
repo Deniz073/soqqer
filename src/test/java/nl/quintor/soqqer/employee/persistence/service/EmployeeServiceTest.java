@@ -16,6 +16,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 import java.util.Map;
@@ -25,7 +28,6 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,22 +42,23 @@ class EmployeeServiceTest {
     private EmployeeService employeeService;
 
     @Test
-    void findAll_Returns_All_Employees_As_EmployeeDTO() {
-        when(employeeRepository.findAll()).thenReturn(
-                List.of(
-                        Employee.builder().name("test").build(),
-                        Employee.builder().name("test2").build()
-                )
+    void findAll_Returns_Employees_As_EmployeeDTO() {
+        var pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "elo"));
+        var employee1 = Employee.builder().name("test").build();
+        var employee2 = Employee.builder().name("test2").build();
+
+        when(employeeRepository.findAll(pageable)).thenReturn(
+                new PageImpl<>(List.of(
+                        employee1,
+                        employee2
+                ))
+
         );
 
-        when(employeeMapper.toDTO(anyList())).thenReturn(
-                List.of(
-                        new EmployeeDTO(1L, "test", null, 1000, 0),
-                        new EmployeeDTO(2L, "test2", null, 1000, 0)
-                )
-        );
+        when(employeeMapper.toDTO(employee1)).thenReturn(new EmployeeDTO(1L, "test", null, 1000, 0));
+        when(employeeMapper.toDTO(employee2)).thenReturn(new EmployeeDTO(2L, "test2", null, 1000, 0));
 
-        var result = employeeService.findAll();
+        var result = employeeService.find(pageable);
 
         assertThat(result).hasSize(2)
                 .extracting(EmployeeDTO::name)
@@ -269,7 +272,7 @@ class EmployeeServiceTest {
 
         var event = new MatchFinishedEvent(10, 6, List.of(1L, 2L), List.of(3L, 4L));
 
-        when(employeeRepository.findAllById(Set.of(1L,2L,3L,4L)))
+        when(employeeRepository.findAllById(Set.of(1L, 2L, 3L, 4L)))
                 .thenReturn(List.of(a1, a2, b1, b2));
 
         employeeService.calculateNewPlayerElos(event);
@@ -292,8 +295,8 @@ class EmployeeServiceTest {
 
         var event = new MatchFinishedEvent(10, 8, List.of(1L), List.of(2L));
 
-        when(employeeRepository.findAllById(Set.of(1L,2L)))
-                .thenReturn(List.of(a,b));
+        when(employeeRepository.findAllById(Set.of(1L, 2L)))
+                .thenReturn(List.of(a, b));
 
         employeeService.calculateNewPlayerElos(event);
 
@@ -313,8 +316,8 @@ class EmployeeServiceTest {
 
         var event = new MatchFinishedEvent(9, 9, List.of(1L), List.of(2L));
 
-        when(employeeRepository.findAllById(Set.of(1L,2L)))
-                .thenReturn(List.of(a,b));
+        when(employeeRepository.findAllById(Set.of(1L, 2L)))
+                .thenReturn(List.of(a, b));
 
         employeeService.calculateNewPlayerElos(event);
 
