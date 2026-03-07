@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -21,5 +22,5 @@ public class MatchDTO {
     private LocalDateTime updatedAt;
     private Integer teamOneScore;
     private Integer teamTwoScore;
-    private Set<MatchPlayerDTO> players;
+    private List<MatchPlayerDTO> players;
 }

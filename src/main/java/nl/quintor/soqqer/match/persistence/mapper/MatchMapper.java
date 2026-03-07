@@ -8,6 +8,7 @@ import nl.quintor.soqqer.match.gateway.api.dto.CreateMatchDTO;
 import nl.quintor.soqqer.match.gateway.api.dto.MatchDTO;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,9 +26,9 @@ public interface MatchMapper {
 
     default MatchDTO toDtoWithEmployees(Match match, Map<Long, EmployeeMTO> employeeMap) {
         var matchDTO = toDto(match);
-        Set<MatchPlayerDTO> players = match.getPlayers().stream()
+        List<MatchPlayerDTO> players = match.getPlayers().stream()
                 .map(player -> new MatchPlayerDTO(employeeMap.get(player.getEmployeeId()), player.getTeam()))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+                .toList();
         matchDTO.setPlayers(players);
         return matchDTO;
     }
