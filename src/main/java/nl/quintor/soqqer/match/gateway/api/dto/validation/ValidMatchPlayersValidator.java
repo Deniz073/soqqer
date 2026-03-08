@@ -3,7 +3,6 @@ package nl.quintor.soqqer.match.gateway.api.dto.validation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import nl.quintor.soqqer.match.persistence.entity.MatchTeam;
-import nl.quintor.soqqer.match.gateway.api.dto.CreateMatchPlayerDTO;
 
 import java.util.HashSet;
 import java.util.List;
@@ -12,10 +11,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ValidMatchPlayersValidator
-        implements ConstraintValidator<ValidMatchPlayers, List<CreateMatchPlayerDTO>> {
+        implements ConstraintValidator<ValidMatchPlayers, List<? extends MatchPlayer>> {
 
     @Override
-    public boolean isValid(List<CreateMatchPlayerDTO> players, ConstraintValidatorContext context) {
+    public boolean isValid(List<? extends MatchPlayer> players, ConstraintValidatorContext context) {
 
         if (players == null) {
             return true;
@@ -29,7 +28,7 @@ public class ValidMatchPlayersValidator
 
         // Check unique employee IDs
         Set<Long> employeeIds = new HashSet<>();
-        for (CreateMatchPlayerDTO player : players) {
+        for (MatchPlayer player : players) {
             if (player == null || player.employeeId() == null) {
                 return false;
             }
@@ -42,7 +41,7 @@ public class ValidMatchPlayersValidator
         Map<MatchTeam, Long> teamCounts =
                 players.stream()
                         .collect(Collectors.groupingBy(
-                                CreateMatchPlayerDTO::team,
+                                MatchPlayer::team,
                                 Collectors.counting()
                         ));
 

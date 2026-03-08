@@ -2,18 +2,17 @@ package nl.quintor.soqqer.match.gateway.api;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import nl.quintor.soqqer.employee.gateway.api.dto.EmployeeDTO;
+import nl.quintor.soqqer.employee.gateway.api.dto.UpdateEmployeeDTO;
 import nl.quintor.soqqer.match.gateway.api.dto.CreateMatchDTO;
 import nl.quintor.soqqer.match.gateway.api.dto.MatchDTO;
+import nl.quintor.soqqer.match.gateway.api.dto.UpdateMatchDTO;
 import nl.quintor.soqqer.match.persistence.service.MatchService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -40,5 +39,13 @@ public class MatchController {
                 .toUri();
 
         return ResponseEntity.created(location).body(match);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<MatchDTO> updateMatch(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateMatchDTO request
+    ) {
+        return ResponseEntity.ok(matchService.update(id, request));
     }
 }
