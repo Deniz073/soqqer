@@ -10,6 +10,19 @@ Soqqer is een applicatie om tafelvoetbalscores bij te houden over de verschillen
 - Java 25
 - Docker (voor de PostgreSQL-database)
 
+## Gebruikte libraries/packages
+
+- Spring Boot 4 (Web MVC, Data JPA, Validation, Actuator)
+- Spring Modulith (modulaire applicatiestructuur en events)
+- Flyway (database migraties)
+- PostgreSQL (runtime database)
+- springdoc-openapi (Swagger/OpenAPI documentatie)
+- MapStruct (DTO/entity mapping)
+- Lombok (boilerplate-reductie)
+- Testcontainers (PostgreSQL-integratietests)
+
+Swagger UI is lokaal beschikbaar op: `http://localhost:8080/swagger-ui/index.html`
+
 ## Lokaal draaien
 
 1. Start PostgreSQL met Docker Compose:
