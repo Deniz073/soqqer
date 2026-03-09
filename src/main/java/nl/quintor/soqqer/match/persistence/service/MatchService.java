@@ -1,5 +1,7 @@
 package nl.quintor.soqqer.match.persistence.service;
 
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nl.quintor.soqqer.employee.EmployeeLookup;
 import nl.quintor.soqqer.employee.EmployeeMTO;
@@ -7,6 +9,8 @@ import nl.quintor.soqqer.common.events.match.MatchFinishedEvent;
 import nl.quintor.soqqer.match.gateway.api.dto.CreateMatchDTO;
 import nl.quintor.soqqer.match.gateway.api.dto.CreateMatchPlayerDTO;
 import nl.quintor.soqqer.match.gateway.api.dto.MatchDTO;
+import nl.quintor.soqqer.match.gateway.api.dto.UpdateMatchDTO;
+import nl.quintor.soqqer.match.gateway.api.dto.UpdateMatchPlayerDTO;
 import nl.quintor.soqqer.match.persistence.entity.Match;
 import nl.quintor.soqqer.match.persistence.entity.MatchPlayer;
 import nl.quintor.soqqer.match.persistence.entity.MatchTeam;
@@ -71,6 +75,26 @@ public class MatchService {
                 savedMatch.getPlayers().stream().filter(p -> p.getTeam().equals(MatchTeam.TEAM_ONE)).map(MatchPlayer::getEmployeeId).toList(),
                 savedMatch.getPlayers().stream().filter(p -> p.getTeam().equals(MatchTeam.TEAM_TWO)).map(MatchPlayer::getEmployeeId).toList()
         ));
+
+        return matchMapper.toDtoWithEmployees(savedMatch, fetchEmployeesForMatches(List.of(savedMatch)));
+    }
+
+    @Transactional
+    public MatchDTO update(Long id, @Valid UpdateMatchDTO request) {
+        var match = matchRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Match with id " + id + " was not found."));
+
+        var employeeIds = request.players().stream()
+                .map(UpdateMatchPlayerDTO::employeeId)
+                .collect(Collectors.toSet());
+
+        var missingEmployeeIds = employeeLookup.findMissingEmployeeIds(employeeIds);
+        if (!missingEmployeeIds.isEmpty()) {
+            throw new UnknownMatchPlayersException(missingEmployeeIds);
+        }
+
+        var updatedMatch = matchMapper.update(request, match);
+        var savedMatch = matchRepository.save(updatedMatch);
 
         return matchMapper.toDtoWithEmployees(savedMatch, fetchEmployeesForMatches(List.of(savedMatch)));
     }

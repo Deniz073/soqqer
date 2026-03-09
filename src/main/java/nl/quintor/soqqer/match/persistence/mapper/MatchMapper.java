@@ -1,5 +1,8 @@
 package nl.quintor.soqqer.match.persistence.mapper;
 
+import nl.quintor.soqqer.employee.gateway.api.dto.UpdateEmployeeDTO;
+import nl.quintor.soqqer.employee.persistence.entity.Employee;
+import nl.quintor.soqqer.match.gateway.api.dto.UpdateMatchDTO;
 import org.mapstruct.*;
 import nl.quintor.soqqer.employee.EmployeeMTO;
 import nl.quintor.soqqer.match.gateway.api.dto.MatchPlayerDTO;
@@ -18,6 +21,8 @@ public interface MatchMapper {
     Match toEntity(CreateMatchDTO createMatchDTO);
 
     MatchDTO toDto(Match match);
+
+    Match update(UpdateMatchDTO dto, @MappingTarget Match match);
 
     @AfterMapping
     default void linkPlayers(@MappingTarget Match match) {

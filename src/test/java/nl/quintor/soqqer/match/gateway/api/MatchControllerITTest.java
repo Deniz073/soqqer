@@ -7,6 +7,8 @@ import nl.quintor.soqqer.employee.persistence.repository.EmployeeRepository;
 import nl.quintor.soqqer.match.gateway.api.dto.CreateMatchDTO;
 import nl.quintor.soqqer.match.gateway.api.dto.CreateMatchPlayerDTO;
 import nl.quintor.soqqer.match.gateway.api.dto.MatchDTO;
+import nl.quintor.soqqer.match.gateway.api.dto.UpdateMatchDTO;
+import nl.quintor.soqqer.match.gateway.api.dto.UpdateMatchPlayerDTO;
 import nl.quintor.soqqer.match.persistence.entity.MatchTeam;
 import nl.quintor.soqqer.match.persistence.repository.MatchRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -115,6 +117,124 @@ class MatchControllerITTest extends BaseITTest {
                 .jsonPath("$.missingEmployeeIds[0]").isEqualTo(99999);
     }
 
+    @Test
+    void updateMatch_Returns_Ok_When_Request_Is_Valid() {
+        var playerOne = createEmployee("Player One", Office.DENBOSCH);
+        var playerTwo = createEmployee("Player Two", Office.DENHAAG);
+        var playerThree = createEmployee("Player Three", Office.GRONINGEN);
+        var playerFour = createEmployee("Player Four", Office.DEVENTER);
+
+        var created = createMatch(new CreateMatchDTO(
+                1,
+                0,
+                List.of(
+                        new CreateMatchPlayerDTO(playerOne.getId(), MatchTeam.TEAM_ONE),
+                        new CreateMatchPlayerDTO(playerTwo.getId(), MatchTeam.TEAM_TWO)
+                )
+        ));
+
+        var updated = updateMatch(created.getId(), new UpdateMatchDTO(
+                7,
+                5,
+                List.of(
+                        new UpdateMatchPlayerDTO(playerThree.getId(), MatchTeam.TEAM_ONE),
+                        new UpdateMatchPlayerDTO(playerFour.getId(), MatchTeam.TEAM_TWO)
+                )
+        ));
+
+        assertThat(updated.getId()).isEqualTo(created.getId());
+        assertThat(updated.getTeamOneScore()).isEqualTo(7);
+        assertThat(updated.getTeamTwoScore()).isEqualTo(5);
+        assertThat(updated.getPlayers()).hasSize(2);
+        assertThat(updated.getPlayers().stream().map(player -> player.employee().name())).containsExactlyInAnyOrder(
+                playerThree.getName(),
+                playerFour.getName()
+        );
+    }
+
+    @Test
+    void updateMatch_Returns_NotFound_When_Match_Does_Not_Exist() {
+        var playerOne = createEmployee("Known Player", Office.GRONINGEN);
+        var playerTwo = createEmployee("Known Player 2", Office.DENHAAG);
+
+        restTestClient.put()
+                .uri("/{id}", 99L)
+                .body(new UpdateMatchDTO(
+                        5,
+                        3,
+                        List.of(
+                                new UpdateMatchPlayerDTO(playerOne.getId(), MatchTeam.TEAM_ONE),
+                                new UpdateMatchPlayerDTO(playerTwo.getId(), MatchTeam.TEAM_TWO)
+                        )
+                ))
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.title").isEqualTo("Entity Not Found")
+                .jsonPath("$.detail").isEqualTo("Entity not found");
+    }
+
+    @Test
+    void updateMatch_Returns_BadRequest_When_Request_Is_Invalid() {
+        var playerOne = createEmployee("Known Player", Office.GRONINGEN);
+        var playerTwo = createEmployee("Known Player 2", Office.DENHAAG);
+
+        var created = createMatch(new CreateMatchDTO(
+                1,
+                0,
+                List.of(
+                        new CreateMatchPlayerDTO(playerOne.getId(), MatchTeam.TEAM_ONE),
+                        new CreateMatchPlayerDTO(playerTwo.getId(), MatchTeam.TEAM_TWO)
+                )
+        ));
+
+        restTestClient.put()
+                .uri("/{id}", created.getId())
+                .body(new UpdateMatchDTO(
+                        -1,
+                        3,
+                        List.of(new UpdateMatchPlayerDTO(playerOne.getId(), MatchTeam.TEAM_ONE))
+                ))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.title").isEqualTo("Validation Error")
+                .jsonPath("$.detail").isEqualTo("Validation failed for one or more fields")
+                .jsonPath("$.errors.teamOneScore").isEqualTo("Team 1 score mag niet lager dan 0 zijn.")
+                .jsonPath("$.errors.players").isEqualTo("Ongeldige spelerssamenstelling.");
+    }
+
+    @Test
+    void updateMatch_Returns_BadRequest_When_Unknown_Player_Is_Used() {
+        var playerOne = createEmployee("Known Player", Office.GRONINGEN);
+        var playerTwo = createEmployee("Known Player 2", Office.DENHAAG);
+
+        var created = createMatch(new CreateMatchDTO(
+                1,
+                0,
+                List.of(
+                        new CreateMatchPlayerDTO(playerOne.getId(), MatchTeam.TEAM_ONE),
+                        new CreateMatchPlayerDTO(playerTwo.getId(), MatchTeam.TEAM_TWO)
+                )
+        ));
+
+        restTestClient.put()
+                .uri("/{id}", created.getId())
+                .body(new UpdateMatchDTO(
+                        5,
+                        3,
+                        List.of(
+                                new UpdateMatchPlayerDTO(playerOne.getId(), MatchTeam.TEAM_ONE),
+                                new UpdateMatchPlayerDTO(99999L, MatchTeam.TEAM_TWO)
+                        )
+                ))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.title").isEqualTo("Unknown player employeeId")
+                .jsonPath("$.missingEmployeeIds[0]").isEqualTo(99999);
+    }
+
     private Employee createEmployee(String name, Office office) {
         return employeeRepository.save(Employee.builder().name(name).office(office).build());
     }
@@ -132,6 +252,21 @@ class MatchControllerITTest extends BaseITTest {
         assertThat(match).isNotNull();
         assertThat(match.getId()).isNotNull();
         assertThat(result.getResponseHeaders().getLocation()).hasPath("/api/matches/" + match.getId());
+        return match;
+    }
+
+    private MatchDTO updateMatch(Long matchId, UpdateMatchDTO dto) {
+        var result = restTestClient.put()
+                .uri("/{id}", matchId)
+                .body(dto)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(MatchDTO.class)
+                .returnResult();
+
+        var match = result.getResponseBody();
+        assertThat(match).isNotNull();
+        assertThat(match.getId()).isEqualTo(matchId);
         return match;
     }
 }

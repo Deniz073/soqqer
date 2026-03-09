@@ -1,11 +1,14 @@
 package nl.quintor.soqqer.match.persistence.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import nl.quintor.soqqer.employee.EmployeeLookup;
 import nl.quintor.soqqer.employee.EmployeeMTO;
 import nl.quintor.soqqer.common.events.match.MatchFinishedEvent;
 import nl.quintor.soqqer.match.gateway.api.dto.CreateMatchDTO;
 import nl.quintor.soqqer.match.gateway.api.dto.CreateMatchPlayerDTO;
 import nl.quintor.soqqer.match.gateway.api.dto.MatchDTO;
+import nl.quintor.soqqer.match.gateway.api.dto.UpdateMatchDTO;
+import nl.quintor.soqqer.match.gateway.api.dto.UpdateMatchPlayerDTO;
 import nl.quintor.soqqer.match.persistence.entity.Match;
 import nl.quintor.soqqer.match.persistence.entity.MatchPlayer;
 import nl.quintor.soqqer.match.persistence.entity.MatchTeam;
@@ -26,6 +29,7 @@ import org.springframework.data.domain.Sort;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -172,6 +176,107 @@ class MatchServiceTest {
         assertThat(event.teamTwoScore()).isEqualTo(8);
         assertThat(event.teamOnePlayerIds()).containsExactly(11L);
         assertThat(event.teamTwoPlayerIds()).containsExactly(22L);
+    }
+
+    @Test
+    void update_Throws_When_Match_Does_Not_Exist() {
+        var dto = new UpdateMatchDTO(
+                10,
+                8,
+                List.of(
+                        new UpdateMatchPlayerDTO(11L, MatchTeam.TEAM_ONE),
+                        new UpdateMatchPlayerDTO(22L, MatchTeam.TEAM_TWO)
+                )
+        );
+
+        when(matchRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> matchService.update(99L, dto))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Match with id 99 was not found.");
+
+        verify(matchRepository, never()).save(any());
+        verify(applicationEventPublisher, never()).publishEvent(any());
+    }
+
+    @Test
+    void update_Throws_When_Unknown_Match_Players_Are_Provided() {
+        var dto = new UpdateMatchDTO(
+                10,
+                8,
+                List.of(
+                        new UpdateMatchPlayerDTO(1L, MatchTeam.TEAM_ONE),
+                        new UpdateMatchPlayerDTO(2L, MatchTeam.TEAM_TWO)
+                )
+        );
+
+        when(matchRepository.findById(5L)).thenReturn(Optional.of(createMatch(5L, 4, 3)));
+        when(employeeLookup.findMissingEmployeeIds(Set.of(1L, 2L))).thenReturn(Set.of(2L));
+
+        assertThatThrownBy(() -> matchService.update(5L, dto))
+                .isInstanceOf(UnknownMatchPlayersException.class)
+                .hasMessage("One or more player employeeIds do not exist: [2]");
+
+        verify(matchRepository, never()).save(any());
+        verify(applicationEventPublisher, never()).publishEvent(any());
+    }
+
+    @Test
+    void update_Saves_And_Returns_Mapped_Dto() {
+        var dto = new UpdateMatchDTO(
+                8,
+                10,
+                List.of(
+                        new UpdateMatchPlayerDTO(11L, MatchTeam.TEAM_ONE),
+                        new UpdateMatchPlayerDTO(22L, MatchTeam.TEAM_TWO)
+                )
+        );
+
+        var existingMatch = createMatch(
+                99L,
+                10,
+                8,
+                createPlayer(11L, MatchTeam.TEAM_ONE),
+                createPlayer(22L, MatchTeam.TEAM_TWO)
+        );
+
+        var updatedMatch = createMatch(
+                99L,
+                8,
+                10,
+                createPlayer(11L, MatchTeam.TEAM_ONE),
+                createPlayer(22L, MatchTeam.TEAM_TWO)
+        );
+
+        var savedMatch = createMatch(
+                99L,
+                8,
+                10,
+                createPlayer(11L, MatchTeam.TEAM_ONE),
+                createPlayer(22L, MatchTeam.TEAM_TWO)
+        );
+
+        var employees = Map.of(
+                11L, new EmployeeMTO("Player One", null, 1000, 0),
+                22L, new EmployeeMTO("Player Two", null, 1000, 0)
+        );
+
+        var mappedDto = new MatchDTO();
+        mappedDto.setId(99L);
+        mappedDto.setTeamOneScore(8);
+        mappedDto.setTeamTwoScore(10);
+
+        when(matchRepository.findById(99L)).thenReturn(Optional.of(existingMatch));
+        when(employeeLookup.findMissingEmployeeIds(Set.of(11L, 22L))).thenReturn(Set.of());
+        when(matchMapper.update(dto, existingMatch)).thenReturn(updatedMatch);
+        when(matchRepository.save(updatedMatch)).thenReturn(savedMatch);
+        when(employeeLookup.findEmployees(Set.of(11L, 22L))).thenReturn(employees);
+        when(matchMapper.toDtoWithEmployees(savedMatch, employees)).thenReturn(mappedDto);
+
+        var result = matchService.update(99L, dto);
+
+        assertThat(result).isEqualTo(mappedDto);
+        verify(applicationEventPublisher, never()).publishEvent(any());
     }
 
     private Match createMatch(Long id, Integer teamOneScore, Integer teamTwoScore, MatchPlayer... players) {
