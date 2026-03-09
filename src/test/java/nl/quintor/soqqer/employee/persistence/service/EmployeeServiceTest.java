@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import nl.quintor.soqqer.employee.EmployeeMTO;
 import nl.quintor.soqqer.employee.gateway.api.dto.CreateEmployeeDTO;
 import nl.quintor.soqqer.employee.gateway.api.dto.EmployeeDTO;
+import nl.quintor.soqqer.employee.gateway.api.dto.EmployeeSelectDTO;
 import nl.quintor.soqqer.employee.gateway.api.dto.UpdateEmployeeDTO;
 import nl.quintor.soqqer.employee.persistence.entity.Employee;
 import nl.quintor.soqqer.employee.persistence.entity.Office;
@@ -28,6 +29,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -77,6 +79,28 @@ class EmployeeServiceTest {
                 .hasMessage("An employee with this name already exists in this office.");
 
         verify(employeeRepository, never()).save(any());
+    }
+
+    @Test
+    void findForSelect_Returns_Minimal_EmployeeDTO_List() {
+        var first = Employee.builder().name("Alex").office(Office.DENBOSCH).build();
+        first.setId(1L);
+        var second = Employee.builder().name("Zoe").office(Office.DENHAAG).build();
+        second.setId(2L);
+
+        var selectDTOs = List.of(
+                new EmployeeSelectDTO(1L, "Alex", "Den Bosch"),
+                new EmployeeSelectDTO(2L, "Zoe", "Den Haag")
+        );
+
+        when(employeeRepository.findAll(eq(Sort.by("name")))).thenReturn(List.of(first, second));
+        when(employeeMapper.toSelectDTO(List.of(first, second))).thenReturn(selectDTOs);
+
+        var result = employeeService.findForSelect();
+
+        assertThat(result).isEqualTo(selectDTOs);
+        verify(employeeRepository).findAll(eq(Sort.by("name")));
+        verify(employeeMapper).toSelectDTO(List.of(first, second));
     }
 
     @Test

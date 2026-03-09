@@ -3,6 +3,7 @@ package nl.quintor.soqqer.employee.persistence.mapper;
 import nl.quintor.soqqer.employee.EmployeeMTO;
 import nl.quintor.soqqer.employee.gateway.api.dto.CreateEmployeeDTO;
 import nl.quintor.soqqer.employee.gateway.api.dto.EmployeeDTO;
+import nl.quintor.soqqer.employee.gateway.api.dto.EmployeeSelectDTO;
 import nl.quintor.soqqer.employee.gateway.api.dto.UpdateEmployeeDTO;
 import nl.quintor.soqqer.employee.persistence.entity.Employee;
 import nl.quintor.soqqer.employee.persistence.entity.Office;
@@ -22,7 +23,10 @@ public interface EmployeeMapper {
     @Mapping(target = "office", source = "office", qualifiedByName = "officeToNormalizedName")
     EmployeeDTO toDTO(Employee employee);
 
-    List<EmployeeDTO> toDTO(List<Employee> employees);
+    @Mapping(target = "office", source = "office", qualifiedByName = "officeToNormalizedName")
+    EmployeeSelectDTO toSelectDTO(Employee employee);
+
+    List<EmployeeSelectDTO> toSelectDTO(List<Employee> employees);
 
     Employee update(UpdateEmployeeDTO dto, @MappingTarget Employee employee);
 
