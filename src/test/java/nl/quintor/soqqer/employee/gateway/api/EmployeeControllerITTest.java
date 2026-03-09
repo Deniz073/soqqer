@@ -45,6 +45,25 @@ class EmployeeControllerITTest extends BaseITTest {
     }
 
     @Test
+    void getEmployeesForSelect_Returns_Minimal_Employee_Data() {
+        var first = createEmployee("Zoe", Office.DENHAAG);
+        var second = createEmployee("Alex", Office.DENBOSCH);
+
+        restTestClient.get().uri("/select-options").exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.length()").isEqualTo(2)
+                .jsonPath("$[0].id").isEqualTo(second.id())
+                .jsonPath("$[0].name").isEqualTo("Alex")
+                .jsonPath("$[0].office").isEqualTo("Den Bosch")
+                .jsonPath("$[0].elo").doesNotExist()
+                .jsonPath("$[0].crawlCounter").doesNotExist()
+                .jsonPath("$[1].id").isEqualTo(first.id())
+                .jsonPath("$[1].name").isEqualTo("Zoe")
+                .jsonPath("$[1].office").isEqualTo("Den Haag");
+    }
+
+    @Test
     void employee_Endpoint_Flow_Create_GetAll_GetById_Update_Delete() {
         var created = createEmployee("Deniz", Office.DENBOSCH);
 

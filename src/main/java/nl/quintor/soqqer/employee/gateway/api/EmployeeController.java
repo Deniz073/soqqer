@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nl.quintor.soqqer.employee.gateway.api.dto.CreateEmployeeDTO;
 import nl.quintor.soqqer.employee.gateway.api.dto.EmployeeDTO;
+import nl.quintor.soqqer.employee.gateway.api.dto.EmployeeSelectDTO;
 import nl.quintor.soqqer.employee.gateway.api.dto.UpdateEmployeeDTO;
 import nl.quintor.soqqer.employee.persistence.service.EmployeeService;
 import org.springframework.data.domain.Page;
@@ -32,6 +33,11 @@ public class EmployeeController {
     @GetMapping
     public ResponseEntity<Page<EmployeeDTO>> getEmployees(@PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(employeeService.find(pageable));
+    }
+
+    @GetMapping("/select-options")
+    public ResponseEntity<List<EmployeeSelectDTO>> getEmployeesForSelect() {
+        return ResponseEntity.ok(employeeService.findForSelect());
     }
 
     @GetMapping("/{id}")

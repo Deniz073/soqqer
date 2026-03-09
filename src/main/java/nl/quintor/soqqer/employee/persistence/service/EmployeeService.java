@@ -7,6 +7,7 @@ import nl.quintor.soqqer.employee.EmployeeLookup;
 import nl.quintor.soqqer.employee.EmployeeMTO;
 import nl.quintor.soqqer.employee.gateway.api.dto.CreateEmployeeDTO;
 import nl.quintor.soqqer.employee.gateway.api.dto.EmployeeDTO;
+import nl.quintor.soqqer.employee.gateway.api.dto.EmployeeSelectDTO;
 import nl.quintor.soqqer.employee.gateway.api.dto.UpdateEmployeeDTO;
 import nl.quintor.soqqer.employee.persistence.entity.Employee;
 import nl.quintor.soqqer.employee.persistence.exception.EmployeeAlreadyExistsException;
@@ -46,6 +47,10 @@ public class EmployeeService implements EmployeeLookup {
 
         var employeesPage = employeeRepository.findAll(pageReq);
         return employeesPage.map(employeeMapper::toDTO);
+    }
+
+    public List<EmployeeSelectDTO> findForSelect() {
+        return employeeMapper.toSelectDTO(employeeRepository.findAll(Sort.by("name")));
     }
 
     public EmployeeDTO create(CreateEmployeeDTO dto) {
