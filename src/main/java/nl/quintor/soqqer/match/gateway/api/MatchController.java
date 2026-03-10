@@ -26,6 +26,11 @@ public class MatchController {
         return ResponseEntity.ok(matchService.find(pageable));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<MatchDTO> getMatchById(@PathVariable Long id) {
+        return ResponseEntity.ok(matchService.findById(id));
+    }
+
     @PostMapping
     public ResponseEntity<MatchDTO> createMatch(@Valid @RequestBody CreateMatchDTO dto) {
         var match = matchService.createMatch(dto);

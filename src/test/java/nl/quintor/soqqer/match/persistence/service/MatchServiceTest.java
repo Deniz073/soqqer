@@ -70,8 +70,8 @@ class MatchServiceTest {
         mappedDto.setTeamTwoScore(8);
 
         var employeeMap = Map.of(
-                11L, new EmployeeMTO("Player One", null, 1000, 0),
-                22L, new EmployeeMTO("Player Two", null, 1000, 0)
+                11L, new EmployeeMTO(1L, "Player One", null, 1000, 0),
+                22L, new EmployeeMTO(2L, "Player Two", null, 1000, 0)
         );
 
         when(matchRepository.findAll(pageable))
@@ -97,6 +97,44 @@ class MatchServiceTest {
 
         assertThat(result.getContent()).isEmpty();
         verify(matchMapper, never()).toDtoWithEmployees(any(), any());
+    }
+
+    @Test
+    void findById_Returns_Match_When_It_Exists() {
+        var match = createMatch(
+                5L,
+                10,
+                8,
+                createPlayer(11L, MatchTeam.TEAM_ONE),
+                createPlayer(22L, MatchTeam.TEAM_TWO)
+        );
+
+        var employees = Map.of(
+                11L, new EmployeeMTO(1L, "Player One", null, 1000, 0),
+                22L, new EmployeeMTO(2L, "Player Two", null, 1000, 0)
+        );
+
+        var mappedDto = new MatchDTO();
+        mappedDto.setId(5L);
+        mappedDto.setTeamOneScore(10);
+        mappedDto.setTeamTwoScore(8);
+
+        when(matchRepository.findById(5L)).thenReturn(Optional.of(match));
+        when(employeeLookup.findEmployees(Set.of(11L, 22L))).thenReturn(employees);
+        when(matchMapper.toDtoWithEmployees(match, employees)).thenReturn(mappedDto);
+
+        var result = matchService.findById(5L);
+
+        assertThat(result).isEqualTo(mappedDto);
+    }
+
+    @Test
+    void findById_Throws_When_Match_Does_Not_Exist() {
+        when(matchRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> matchService.findById(99L))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Match with id 99 was not found.");
     }
 
     @Test
@@ -149,8 +187,8 @@ class MatchServiceTest {
         );
 
         var employees = Map.of(
-                11L, new EmployeeMTO("Player One", null, 1000, 0),
-                22L, new EmployeeMTO("Player Two", null, 1000, 0)
+                11L, new EmployeeMTO(1L, "Player One", null, 1000, 0),
+                22L, new EmployeeMTO(2L, "Player Two", null, 1000, 0)
         );
 
         var mappedDto = new MatchDTO();
@@ -240,25 +278,9 @@ class MatchServiceTest {
                 createPlayer(22L, MatchTeam.TEAM_TWO)
         );
 
-        var updatedMatch = createMatch(
-                99L,
-                8,
-                10,
-                createPlayer(11L, MatchTeam.TEAM_ONE),
-                createPlayer(22L, MatchTeam.TEAM_TWO)
-        );
-
-        var savedMatch = createMatch(
-                99L,
-                8,
-                10,
-                createPlayer(11L, MatchTeam.TEAM_ONE),
-                createPlayer(22L, MatchTeam.TEAM_TWO)
-        );
-
         var employees = Map.of(
-                11L, new EmployeeMTO("Player One", null, 1000, 0),
-                22L, new EmployeeMTO("Player Two", null, 1000, 0)
+                11L, new EmployeeMTO(1L, "Player One", null, 1000, 0),
+                22L, new EmployeeMTO(2L, "Player Two", null, 1000, 0)
         );
 
         var mappedDto = new MatchDTO();
@@ -268,15 +290,55 @@ class MatchServiceTest {
 
         when(matchRepository.findById(99L)).thenReturn(Optional.of(existingMatch));
         when(employeeLookup.findMissingEmployeeIds(Set.of(11L, 22L))).thenReturn(Set.of());
-        when(matchMapper.update(dto, existingMatch)).thenReturn(updatedMatch);
-        when(matchRepository.save(updatedMatch)).thenReturn(savedMatch);
+        when(matchRepository.save(existingMatch)).thenReturn(existingMatch);
         when(employeeLookup.findEmployees(Set.of(11L, 22L))).thenReturn(employees);
-        when(matchMapper.toDtoWithEmployees(savedMatch, employees)).thenReturn(mappedDto);
+        when(matchMapper.toDtoWithEmployees(existingMatch, employees)).thenReturn(mappedDto);
 
         var result = matchService.update(99L, dto);
 
         assertThat(result).isEqualTo(mappedDto);
+        assertThat(existingMatch.getTeamOneScore()).isEqualTo(8);
+        assertThat(existingMatch.getTeamTwoScore()).isEqualTo(10);
         verify(applicationEventPublisher, never()).publishEvent(any());
+    }
+
+    @Test
+    void update_Replaces_Removed_Players_And_Reuses_Existing_Player_By_EmployeeId() {
+        var existingPlayer = createPlayer(11L, MatchTeam.TEAM_ONE);
+        var removedPlayer = createPlayer(22L, MatchTeam.TEAM_TWO);
+        var existingMatch = createMatch(99L, 10, 8, existingPlayer, removedPlayer);
+
+        var dto = new UpdateMatchDTO(
+                12,
+                10,
+                List.of(
+                        new UpdateMatchPlayerDTO(11L, MatchTeam.TEAM_TWO),
+                        new UpdateMatchPlayerDTO(33L, MatchTeam.TEAM_ONE)
+                )
+        );
+
+        var employees = Map.of(
+                11L, new EmployeeMTO(1L, "Player One", null, 1000, 0),
+                33L, new EmployeeMTO(3L, "Player Three", null, 1000, 0)
+        );
+
+        var mappedDto = new MatchDTO();
+        mappedDto.setId(99L);
+        mappedDto.setTeamOneScore(12);
+        mappedDto.setTeamTwoScore(10);
+
+        when(matchRepository.findById(99L)).thenReturn(Optional.of(existingMatch));
+        when(employeeLookup.findMissingEmployeeIds(Set.of(11L, 33L))).thenReturn(Set.of());
+        when(matchRepository.save(existingMatch)).thenReturn(existingMatch);
+        when(employeeLookup.findEmployees(Set.of(11L, 33L))).thenReturn(employees);
+        when(matchMapper.toDtoWithEmployees(existingMatch, employees)).thenReturn(mappedDto);
+
+        matchService.update(99L, dto);
+
+        assertThat(existingMatch.getPlayers()).hasSize(2);
+        assertThat(existingMatch.getPlayers().stream().map(MatchPlayer::getEmployeeId)).containsExactlyInAnyOrder(11L, 33L);
+        assertThat(existingPlayer.getTeam()).isEqualTo(MatchTeam.TEAM_TWO);
+        assertThat(existingMatch.getPlayers().stream().allMatch(player -> player.getMatch() == existingMatch)).isTrue();
     }
 
     private Match createMatch(Long id, Integer teamOneScore, Integer teamTwoScore, MatchPlayer... players) {

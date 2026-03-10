@@ -25,6 +25,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,6 +54,13 @@ public class MatchService {
         var employeeMap = fetchEmployeesForMatches(matchPage.getContent());
 
         return matchPage.map(match -> matchMapper.toDtoWithEmployees(match, employeeMap));
+    }
+
+    public MatchDTO findById(Long id) {
+        var match = matchRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Match with id " + id + " was not found."));
+
+        return matchMapper.toDtoWithEmployees(match, fetchEmployeesForMatches(List.of(match)));
     }
 
     @Transactional
@@ -93,10 +101,38 @@ public class MatchService {
             throw new UnknownMatchPlayersException(missingEmployeeIds);
         }
 
-        var updatedMatch = matchMapper.update(request, match);
-        var savedMatch = matchRepository.save(updatedMatch);
+        match.setTeamOneScore(request.teamOneScore());
+        match.setTeamTwoScore(request.teamTwoScore());
+        synchronizePlayers(match, request.players());
+
+        var savedMatch = matchRepository.save(match);
 
         return matchMapper.toDtoWithEmployees(savedMatch, fetchEmployeesForMatches(List.of(savedMatch)));
+    }
+
+    private void synchronizePlayers(Match match, List<UpdateMatchPlayerDTO> requestedPlayers) {
+        var existingPlayersByEmployeeId = new HashMap<Long, MatchPlayer>();
+        match.getPlayers().forEach(player -> existingPlayersByEmployeeId.put(player.getEmployeeId(), player));
+
+        var requestedEmployeeIds = requestedPlayers.stream()
+                .map(UpdateMatchPlayerDTO::employeeId)
+                .collect(Collectors.toSet());
+
+        match.getPlayers().removeIf(player -> !requestedEmployeeIds.contains(player.getEmployeeId()));
+
+        for (var requestedPlayer : requestedPlayers) {
+            var existingPlayer = existingPlayersByEmployeeId.get(requestedPlayer.employeeId());
+            if (existingPlayer != null) {
+                existingPlayer.setTeam(requestedPlayer.team());
+                continue;
+            }
+
+            var player = new MatchPlayer();
+            player.setEmployeeId(requestedPlayer.employeeId());
+            player.setTeam(requestedPlayer.team());
+            player.setMatch(match);
+            match.getPlayers().add(player);
+        }
     }
 
     private Map<Long, EmployeeMTO> fetchEmployeesForMatches(List<Match> matches) {
