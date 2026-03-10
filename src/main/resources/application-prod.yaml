@@ -3,5 +3,5 @@ spring:
     show-sql: false
 
 springdoc:
-  swagger-ui:
+  api-docs:
     enabled: false
