@@ -80,6 +80,42 @@ class MatchControllerITTest extends BaseITTest {
     }
 
     @Test
+    void getMatchById_Returns_Ok_When_Match_Exists() {
+        var playerOne = createEmployee("Player One", Office.DENBOSCH);
+        var playerTwo = createEmployee("Player Two", Office.DENHAAG);
+
+        var created = createMatch(new CreateMatchDTO(
+                10,
+                8,
+                List.of(
+                        new CreateMatchPlayerDTO(playerOne.getId(), MatchTeam.TEAM_ONE),
+                        new CreateMatchPlayerDTO(playerTwo.getId(), MatchTeam.TEAM_TWO)
+                )
+        ));
+
+        restTestClient.get()
+                .uri("/{id}", created.getId())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(created.getId())
+                .jsonPath("$.teamOneScore").isEqualTo(10)
+                .jsonPath("$.teamTwoScore").isEqualTo(8)
+                .jsonPath("$.players.length()").isEqualTo(2);
+    }
+
+    @Test
+    void getMatchById_Returns_NotFound_When_Match_Does_Not_Exist() {
+        restTestClient.get()
+                .uri("/{id}", 99L)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.title").isEqualTo("Entity Not Found")
+                .jsonPath("$.detail").isEqualTo("Entity not found");
+    }
+
+    @Test
     @SuppressWarnings("ConstantConditions")
     void createMatch_Returns_BadRequest_When_Request_Is_Invalid() {
         restTestClient.post()
@@ -149,6 +185,40 @@ class MatchControllerITTest extends BaseITTest {
         assertThat(updated.getPlayers().stream().map(player -> player.employee().name())).containsExactlyInAnyOrder(
                 playerThree.getName(),
                 playerFour.getName()
+        );
+    }
+
+    @Test
+    void updateMatch_Returns_Ok_When_Request_Contains_Existing_Player_And_New_Player() {
+        var playerOne = createEmployee("Player One", Office.DENBOSCH);
+        var playerTwo = createEmployee("Player Two", Office.DENHAAG);
+        var playerThree = createEmployee("Player Three", Office.GRONINGEN);
+
+        var created = createMatch(new CreateMatchDTO(
+                1,
+                0,
+                List.of(
+                        new CreateMatchPlayerDTO(playerOne.getId(), MatchTeam.TEAM_ONE),
+                        new CreateMatchPlayerDTO(playerTwo.getId(), MatchTeam.TEAM_TWO)
+                )
+        ));
+
+        var updated = updateMatch(created.getId(), new UpdateMatchDTO(
+                7,
+                5,
+                List.of(
+                        new UpdateMatchPlayerDTO(playerOne.getId(), MatchTeam.TEAM_TWO),
+                        new UpdateMatchPlayerDTO(playerThree.getId(), MatchTeam.TEAM_ONE)
+                )
+        ));
+
+        assertThat(updated.getId()).isEqualTo(created.getId());
+        assertThat(updated.getTeamOneScore()).isEqualTo(7);
+        assertThat(updated.getTeamTwoScore()).isEqualTo(5);
+        assertThat(updated.getPlayers()).hasSize(2);
+        assertThat(updated.getPlayers().stream().map(player -> player.employee().name())).containsExactlyInAnyOrder(
+                playerOne.getName(),
+                playerThree.getName()
         );
     }
 
@@ -233,6 +303,42 @@ class MatchControllerITTest extends BaseITTest {
                 .expectBody()
                 .jsonPath("$.title").isEqualTo("Unknown player employeeId")
                 .jsonPath("$.missingEmployeeIds[0]").isEqualTo(99999);
+    }
+
+    @Test
+    void deleteMatch_Returns_NoContent_When_Match_Exists() {
+        var playerOne = createEmployee("Player One", Office.DENBOSCH);
+        var playerTwo = createEmployee("Player Two", Office.DENHAAG);
+
+        var created = createMatch(new CreateMatchDTO(
+                10,
+                8,
+                List.of(
+                        new CreateMatchPlayerDTO(playerOne.getId(), MatchTeam.TEAM_ONE),
+                        new CreateMatchPlayerDTO(playerTwo.getId(), MatchTeam.TEAM_TWO)
+                )
+        ));
+
+        restTestClient.delete()
+                .uri("/{id}", created.getId())
+                .exchange()
+                .expectStatus().isNoContent();
+
+        restTestClient.get()
+                .uri("/{id}", created.getId())
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void deleteMatch_Returns_NotFound_When_Match_Does_Not_Exist() {
+        restTestClient.delete()
+                .uri("/{id}", 99L)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.title").isEqualTo("Entity Not Found")
+                .jsonPath("$.detail").isEqualTo("Entity not found");
     }
 
     private Employee createEmployee(String name, Office office) {

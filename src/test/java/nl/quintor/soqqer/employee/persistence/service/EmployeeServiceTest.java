@@ -250,15 +250,15 @@ class EmployeeServiceTest {
         second.setId(2L);
 
         when(employeeRepository.findAllById(Set.of(1L, 2L))).thenReturn(List.of(first, second));
-        when(employeeMapper.toMTO(first)).thenReturn(new EmployeeMTO("test", "Den Bosch", 1000, 0));
-        when(employeeMapper.toMTO(second)).thenReturn(new EmployeeMTO("test2", "Den Haag", 1000, 0));
+        when(employeeMapper.toMTO(first)).thenReturn(new EmployeeMTO(1L, "test", "Den Bosch", 1000, 0));
+        when(employeeMapper.toMTO(second)).thenReturn(new EmployeeMTO(2L, "test2", "Den Haag", 1000, 0));
 
         var result = employeeService.findEmployees(Set.of(1L, 2L));
 
         assertThat(result)
                 .isEqualTo(Map.of(
-                        1L, new EmployeeMTO("test", "Den Bosch", 1000, 0),
-                        2L, new EmployeeMTO("test2", "Den Haag", 1000, 0)
+                        1L, new EmployeeMTO(1L, "test", "Den Bosch", 1000, 0),
+                        2L, new EmployeeMTO(2L, "test2", "Den Haag", 1000, 0)
                 ));
     }
 
