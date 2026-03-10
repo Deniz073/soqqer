@@ -36,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -339,6 +340,27 @@ class MatchServiceTest {
         assertThat(existingMatch.getPlayers().stream().map(MatchPlayer::getEmployeeId)).containsExactlyInAnyOrder(11L, 33L);
         assertThat(existingPlayer.getTeam()).isEqualTo(MatchTeam.TEAM_TWO);
         assertThat(existingMatch.getPlayers().stream().allMatch(player -> player.getMatch() == existingMatch)).isTrue();
+    }
+
+    @Test
+    void delete_Removes_Match_When_It_Exists() {
+        var match = createMatch(55L, 3, 2, createPlayer(11L, MatchTeam.TEAM_ONE), createPlayer(22L, MatchTeam.TEAM_TWO));
+        when(matchRepository.findById(55L)).thenReturn(Optional.of(match));
+
+        matchService.delete(55L);
+
+        verify(matchRepository, times(1)).delete(match);
+    }
+
+    @Test
+    void delete_Throws_When_Match_Does_Not_Exist() {
+        when(matchRepository.findById(77L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> matchService.delete(77L))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Match with id 77 was not found.");
+
+        verify(matchRepository, never()).delete(any());
     }
 
     private Match createMatch(Long id, Integer teamOneScore, Integer teamTwoScore, MatchPlayer... players) {

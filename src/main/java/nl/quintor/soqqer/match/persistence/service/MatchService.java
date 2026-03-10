@@ -110,6 +110,13 @@ public class MatchService {
         return matchMapper.toDtoWithEmployees(savedMatch, fetchEmployeesForMatches(List.of(savedMatch)));
     }
 
+    @Transactional
+    public void delete(Long id) {
+        var match = matchRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Match with id " + id + " was not found."));
+        matchRepository.delete(match);
+    }
+
     private void synchronizePlayers(Match match, List<UpdateMatchPlayerDTO> requestedPlayers) {
         var existingPlayersByEmployeeId = new HashMap<Long, MatchPlayer>();
         match.getPlayers().forEach(player -> existingPlayersByEmployeeId.put(player.getEmployeeId(), player));
@@ -124,6 +131,7 @@ public class MatchService {
             var existingPlayer = existingPlayersByEmployeeId.get(requestedPlayer.employeeId());
             if (existingPlayer != null) {
                 existingPlayer.setTeam(requestedPlayer.team());
+                existingPlayer.setMatch(match);
                 continue;
             }
 

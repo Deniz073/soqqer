@@ -305,6 +305,42 @@ class MatchControllerITTest extends BaseITTest {
                 .jsonPath("$.missingEmployeeIds[0]").isEqualTo(99999);
     }
 
+    @Test
+    void deleteMatch_Returns_NoContent_When_Match_Exists() {
+        var playerOne = createEmployee("Player One", Office.DENBOSCH);
+        var playerTwo = createEmployee("Player Two", Office.DENHAAG);
+
+        var created = createMatch(new CreateMatchDTO(
+                10,
+                8,
+                List.of(
+                        new CreateMatchPlayerDTO(playerOne.getId(), MatchTeam.TEAM_ONE),
+                        new CreateMatchPlayerDTO(playerTwo.getId(), MatchTeam.TEAM_TWO)
+                )
+        ));
+
+        restTestClient.delete()
+                .uri("/{id}", created.getId())
+                .exchange()
+                .expectStatus().isNoContent();
+
+        restTestClient.get()
+                .uri("/{id}", created.getId())
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void deleteMatch_Returns_NotFound_When_Match_Does_Not_Exist() {
+        restTestClient.delete()
+                .uri("/{id}", 99L)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.title").isEqualTo("Entity Not Found")
+                .jsonPath("$.detail").isEqualTo("Entity not found");
+    }
+
     private Employee createEmployee(String name, Office office) {
         return employeeRepository.save(Employee.builder().name(name).office(office).build());
     }

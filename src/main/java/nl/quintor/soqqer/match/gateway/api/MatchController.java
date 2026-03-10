@@ -51,4 +51,10 @@ public class MatchController {
     ) {
         return ResponseEntity.ok(matchService.update(id, request));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMatch(@PathVariable Long id) {
+        matchService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
 }
