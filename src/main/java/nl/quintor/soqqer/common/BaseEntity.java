@@ -8,7 +8,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Getter
 @Setter
@@ -33,19 +32,19 @@ public abstract class BaseEntity {
     public final boolean equals(Object o) {
         if (this == o) return true;
         if (o == null) return false;
-        if (this.getClass() != o.getClass()) return false;
 
-        Class<?> oEffectiveClass = o instanceof HibernateProxy oProxy ?
-                oProxy.getHibernateLazyInitializer().getPersistentClass() :
-                o.getClass();
+        Class<?> oEffectiveClass = o instanceof HibernateProxy proxy
+                ? proxy.getHibernateLazyInitializer().getPersistentClass()
+                : o.getClass();
 
-        Class<?> thisEffectiveClass = this instanceof HibernateProxy thisProxy ?
-                thisProxy.getHibernateLazyInitializer().getPersistentClass() :
-                this.getClass();
+        Class<?> thisEffectiveClass = this instanceof HibernateProxy proxy
+                ? proxy.getHibernateLazyInitializer().getPersistentClass()
+                : this.getClass();
 
         if (thisEffectiveClass != oEffectiveClass) return false;
+
         BaseEntity that = (BaseEntity) o;
-        return getId() != null && Objects.equals(getId(), that.getId());
+        return id != null && id.equals(that.id);
     }
 
     @Override
