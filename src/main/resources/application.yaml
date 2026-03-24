@@ -18,12 +18,12 @@ management:
     tracing:
       export:
         otlp:
-          endpoint: http://localhost:4318/v1/traces
+          endpoint: ${TRACING_ENDPOINT:http://localhost:4318/v1/traces}
     logging:
       export:
         otlp:
-          endpoint: http://localhost:4318/v1/logs
+          endpoint: ${LOGGING_ENDPOINT:http://localhost:4318/v1/logs}
   otlp:
     metrics:
       export:
-        url: http://localhost:4318/v1/metrics
+        url: ${METRICS_ENDPOINT:http://localhost:4318/v1/metrics}
