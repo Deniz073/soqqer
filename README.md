@@ -22,6 +22,7 @@ Soqqer is een applicatie om tafelvoetbalscores bij te houden over de verschillen
 - Testcontainers (PostgreSQL-integratietests)
 
 Swagger UI is lokaal beschikbaar op: `http://localhost:8080/swagger-ui/index.html`
+Grafana is beschikbaar op: `http://localhost:3001`
 
 ## Lokaal draaien
 
