@@ -17,5 +17,14 @@ services:
       retries: 10
       start_period: 10s
 
+  grafana-lgtm:
+    image: 'grafana/otel-lgtm:latest'
+    ports:
+      - '3001:3000'
+      - '4317'
+      - '4318'
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+
 volumes:
   postgres_data:
